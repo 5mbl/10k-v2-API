@@ -1,0 +1,64 @@
+########################################################
+#  Python / FastAPI backend – .gitignore
+########################################################
+
+# ---- 1.  Runtime stuff -------------------------------------------------
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+.pytest_cache/
+
+# ---- 2.  Virtual environments -----------------------------------------
+# Common names
+venv/
+.venv/
+env/
+.env/        # if you use direnv or similar
+# Poetry
+.poetry/
+
+# ---- 3.  Environment / secret files -----------------------------------
+.env
+*.env
+*.secret
+*.key
+
+# ---- 4.  Build / distribution -----------------------------------------
+build/
+dist/
+*.egg-info/
+wheelhouse/
+
+# ---- 5.  Logs and dumps -----------------------------------------------
+*.log
+*.sqlite3
+*.db
+*.pid
+*.gz
+*.zip
+
+# ---- 6.  IDE / Editor folders -----------------------------------------
+.vscode/
+.idea/
+*.swp
+*~               # Vim swap / backup
+*.sublime-workspace
+*.sublime-project
+
+# ---- 7.  OS‑specific clutter ------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ---- 8.  Project‑specific ------------------------------------------------
+# Ignore your backend’s data/ or upload/ folders if present
+# data/
+# uploads/
+
+########################################################
+# End of .gitignore
+########################################################
