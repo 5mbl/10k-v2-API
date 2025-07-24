@@ -48,4 +48,4 @@ app.include_router(hybrid_router, prefix="/api", tags=["hybrid"])
 # Root endpoint (optional)
 @app.get("/")
 def root():
-    return {"message": "Welcome to the API"}
+    return {"message": "Welcome to the SEC-RAG-API"}
