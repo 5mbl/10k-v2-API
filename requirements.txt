@@ -4,3 +4,4 @@ llama-index
 openai
 python-dotenv
 pinecone-client
+pinecone
