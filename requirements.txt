@@ -5,3 +5,5 @@ openai
 python-dotenv
 pinecone-client
 pinecone
+llama-index-vector-stores-pinecone
+
