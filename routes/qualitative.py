@@ -74,7 +74,7 @@ async def handle_qualitative(query: str):
 
         search_results = pinecone_index.query(
             vector=query_vector,
-            top_k=5,
+            top_k=10,
             include_metadata=True,
             filter=pinecone_filter,
         )
