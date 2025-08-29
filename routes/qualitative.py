@@ -4,7 +4,7 @@ from routes.utils import embed_model, query_engine, pinecone_index, llm
 
 logger = logging.getLogger(__name__)
 
-logger.info("Qualitative route loaded 🎉")
+logger.info("Qualitative route module initialized")
 
 # ---------------------------------------------------------------------
 # 1) Entity Extraction (company and year)
@@ -12,9 +12,9 @@ logger.info("Qualitative route loaded 🎉")
 
 async def extract_company_and_year(query: str):
 
-    """
-    Very lightweight extractor; swap in an LLM call if you need more nuance.
-    """
+
+    logger.info("Starting entity extraction for query: %s", query[:100] + "..." if len(query) > 100 else query)
+    
     prompt = (
         'Extract the company and year from the following query.\n'
         'Return ONLY valid JSON like: {"company": "...", "year": 2023}\n\n'
@@ -27,9 +27,7 @@ async def extract_company_and_year(query: str):
         
         raw = raw_response.text
         
-        
-        logger.debug(f"LLM raw → {raw}")
-
+        logger.debug("LLM response received: %s", raw)
 
         data = json.loads(raw.strip())
         company = data.get("company")
@@ -39,14 +37,10 @@ async def extract_company_and_year(query: str):
         # force **float** so it matches 2021.0 stored in Pinecone
         year = float(year_raw) if year_raw is not None else None
 
-        logger.info("This WILL appear 2 🎉")
-
-        logger.info("Extracted company=%s, year=%s", company, year)
-
+        logger.info("Entity extraction completed successfully - company: %s, year: %s", company, year)
 
     except Exception as e:
-        logger.error("Failed to extract company and year: %s", e, exc_info=True)
-
+        logger.error("Entity extraction failed: %s", e, exc_info=True)
         company, year = None, None
 
     return {"company": company, "year": year}
@@ -57,12 +51,16 @@ async def extract_company_and_year(query: str):
 
 
 async def handle_qualitative(query: str):
+    logger.info("Processing qualitative query: %s", query[:100] + "..." if len(query) > 100 else query)
+    
     try:
         # --- a. figure out company & year -----------------------------------
+        logger.debug("Step 1: Extracting company and year from query")
         info = await extract_company_and_year(query)
         company, year = info["company"], info["year"]
 
         # --- b. get embedding ------------------------------------------------
+        logger.debug("Step 2: Generating query embedding")
         query_vector = embed_model.get_text_embedding(query)
 
         # --- c. build Pinecone filter (only if both fields present) ----------
@@ -71,7 +69,9 @@ async def handle_qualitative(query: str):
             if company and year
             else None
         )
+        logger.debug("Step 3: Pinecone filter created: %s", pinecone_filter)
 
+        logger.debug("Step 4: Querying Pinecone index")
         search_results = pinecone_index.query(
             vector=query_vector,
             top_k=10,
@@ -87,10 +87,13 @@ async def handle_qualitative(query: str):
             }
             for m in search_results.get("matches", [])
         ]
+        logger.debug("Step 5: Retrieved %d text chunks from Pinecone", len(retrieved_texts))
 
         # --- e. ask the LLM for the answer ----------------------------------
+        logger.debug("Step 6: Generating final response using query engine")
         response = query_engine.query(query)
 
+        logger.info("Qualitative query processed successfully - retrieved %d chunks", len(retrieved_texts))
         return {
             "question": query,
             "type": "qualitative",
@@ -100,6 +103,7 @@ async def handle_qualitative(query: str):
         }
 
     except Exception as e:
+        logger.error("Qualitative query processing failed: %s", e, exc_info=True)
         return {
             "question": query,
             "type": "qualitative",
